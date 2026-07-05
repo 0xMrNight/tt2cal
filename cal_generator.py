@@ -1,6 +1,9 @@
 import pandas as pd
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from icalendar import Calendar, Event, vRecur
+
+tz = ZoneInfo("Asia/Kolkata")
 
 def first_occurrence(day: str, st: str, end: str, sst: str) -> tuple[datetime, datetime]:
     """Calculates dtstart and dtend for the first occurrence of a slot"""
@@ -15,8 +18,8 @@ def first_occurrence(day: str, st: str, end: str, sst: str) -> tuple[datetime, d
     start_h, start_m = map(int, st.split(":"))
     end_h, end_m = map(int, end.split(":"))
     
-    dtstart = target_date.replace(hour=start_h, minute=start_m, second=0, microsecond=0)
-    dtend = target_date.replace(hour=end_h, minute=end_m, second=0, microsecond=0)
+    dtstart = target_date.replace(hour=start_h, minute=start_m, second=0, microsecond=0, tzinfo=tz)
+    dtend = target_date.replace(hour=end_h, minute=end_m, second=0, microsecond=0, tzinfo=tz)
 
     return dtstart, dtend
 
@@ -83,6 +86,8 @@ def generate_ical_file(csv_path: str, slots_data: dict, sem_start: str, sem_end:
             }))
 
             cal.add_component(event)
+
+    cal.add_missing_timezones()
 
     with open(output_path, 'wb') as f:
         f.write(cal.to_ical())
